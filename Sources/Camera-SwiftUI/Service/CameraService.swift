@@ -81,6 +81,7 @@ public class CameraService: NSObject, Identifiable {
     var isSessionRunning = false
     var isConfigured = false
     var setupResult: SessionSetupResult = .success
+    public var cameraPosition: AVCaptureDevice.Position = .back
     
     // Communicate with the session and other session objects on this queue.
     let sessionQueue = DispatchQueue(label: "session queue")
@@ -194,10 +195,10 @@ public class CameraService: NSObject, Identifiable {
         do {
             var defaultVideoDevice: AVCaptureDevice?
             
-            if let backCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
+            if cameraPosition == .back && let backCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back) {
                 // If a rear dual camera is not available, default to the rear wide angle camera.
                 defaultVideoDevice = backCameraDevice
-            } else if let frontCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) {
+            } else if cameraPosition == .front && let frontCameraDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front) {
                 // If the rear wide angle camera isn't available, default to the front wide angle camera.
                 defaultVideoDevice = frontCameraDevice
             }
@@ -345,6 +346,8 @@ public class CameraService: NSObject, Identifiable {
                     self.photoOutput.maxPhotoQualityPrioritization = .quality
                     
                     self.session.commitConfiguration()
+                    
+                    self.cameraPosition = preferredPosition
                 } catch {
                     print("Error occurred while creating video device input: \(error)")
                 }
